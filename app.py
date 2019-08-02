@@ -36,22 +36,24 @@ def create_user(nfc_id):
     if response is None:
         c.execute("INSERT INTO users VALUES ('{}','{}',{})".format('', nfc_id, 0))
         conn.commit()
-        logging.debug('User Created')
+        app.logger.debug('User Created')
     else:
-        logging.debug('User already exists')
+        app.logger.debug('User already exists')
     conn.close()
+    return "Done!"
 
 
 @app.route("/register", methods=['POST'])
 def register():
     bar = request.args.to_dict()
-    return create_user(bar['nfcId'])
+    return create_user(bar['nfcid'])
 
 
 @app.route("/user", methods=['GET'])
 def user():
     bar = request.args.to_dict()
-    logging.debug('request')
+    app.logger.debug(request)
+    app.logger.debug(bar)
     return get_user(bar['nfcid'])
 
 
