@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.logger.setLevel(logging.DEBUG)
 
 
-def get_user(nfc_id):
+def read_user_from_database(nfc_id):
     conn = sqlite3.connect('eisapp.db')
     c = conn.cursor()
     app.logger.debug('request for: {}'.format(nfc_id))
@@ -17,6 +17,12 @@ def get_user(nfc_id):
     app.logger.debug('query : {}'.format(query))
     c.execute(query)
     response = c.fetchone()
+    conn.close()
+    return response
+
+
+def get_user(nfc_id):
+    response = read_user_from_database(nfc_id)
     response_json = json.dumps({
         'name': response[0],
         'nfcid': response[1],
@@ -25,21 +31,20 @@ def get_user(nfc_id):
     })
     app.logger.debug(response)
     app.logger.debug(response_json)
-    conn.close()
     return str(response_json)
 
 
 def create_user(nfc_id):
-    conn = sqlite3.connect('eisapp.db')
-    c = conn.cursor()
-    response = get_user(nfc_id)
+    response = read_user_from_database(nfc_id)
     if response is None:
+        conn = sqlite3.connect('eisapp.db')
+        c = conn.cursor()
         c.execute("INSERT INTO users VALUES ('{}','{}',{})".format('', nfc_id, 0))
         conn.commit()
         app.logger.debug('User Created')
+        conn.close()
     else:
         app.logger.debug('User already exists')
-    conn.close()
     return "Done!"
 
 
