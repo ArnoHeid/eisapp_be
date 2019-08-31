@@ -1,48 +1,32 @@
 from flask import Flask
 from flask import request
 import logging
-import sqlite3
-import json
+from user import db
+from user import User
 
 app = Flask(__name__)
-
 app.logger.setLevel(logging.DEBUG)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///eisapp.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-
-def read_user_from_database(nfc_id):
-    conn = sqlite3.connect('eisapp.db')
-    c = conn.cursor()
-    app.logger.debug('request for: {}'.format(nfc_id))
-    query = "SELECT * FROM users WHERE nfcid = '{}'".format(nfc_id)
-    app.logger.debug('query : {}'.format(query))
-    c.execute(query)
-    response = c.fetchone()
-    conn.close()
-    return response
+# later on
+db.init_app(app)
 
 
 def get_user(nfc_id):
-    response = read_user_from_database(nfc_id)
-    response_json = json.dumps({
-        'name': response[0],
-        'nfcid': response[1],
-        'amount': response[2],
-        'isok': True
-    })
+    response = User.query.filter_by(nfcid=nfc_id).first_or_404()
     app.logger.debug(response)
-    app.logger.debug(response_json)
-    return str(response_json)
+    app.logger.debug(response.create_json())
+    return str(response.create_json(True))
 
 
 def create_user(nfc_id):
-    response = read_user_from_database(nfc_id)
+    response = User.query.filter_by(nfcid=nfc_id).first()
     if response is None:
-        conn = sqlite3.connect('eisapp.db')
-        c = conn.cursor()
-        c.execute("INSERT INTO users VALUES ('{}','{}',{})".format('', nfc_id, 0))
-        conn.commit()
+        new_user = User(nfc_id)
+        db.session.add(new_user)
+        db.session.commit()
         app.logger.debug('User Created')
-        conn.close()
     else:
         app.logger.debug('User already exists')
     return "Done!"
@@ -63,4 +47,4 @@ def user():
 
 
 if __name__ == '__main__':
-    app.run(host='192.168.137.1', debug=True)
+    app.run(host='192.168.178.22', debug=True)

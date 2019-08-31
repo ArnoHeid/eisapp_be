@@ -7,6 +7,6 @@ verify_ssl = true
 
 [packages]
 flask = "*"
-
+flask_sqlalchemy ="*"
 [requires]
 python_version = "3.6"
