@@ -1,6 +1,7 @@
 FROM python:alpine3.7
-COPY . /app
+COPY app /app
+COPY requirements.txt /app
 WORKDIR /app
 RUN pip install -r requirements.txt
 EXPOSE 5000
-CMD env FLASK_APP=app.py flask run
+CMD ["flask", "run", "--host", "0.0.0.0"]

@@ -15,6 +15,7 @@ class User(db.Model):
     def __init__(self, nfcid):
         self.nfcid = nfcid
 
+
     def create_json(self, do_update=False):
         response_json = json.dumps({
             'name': self.username,

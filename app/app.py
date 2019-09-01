@@ -1,8 +1,8 @@
 from flask import Flask
 from flask import request
 import logging
-from user import db
-from user import User
+from model.user import db
+from model.user import User
 
 app = Flask(__name__)
 app.logger.setLevel(logging.DEBUG)
@@ -11,6 +11,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # later on
 db.init_app(app)
+db.create_all(app=app)
 
 
 def get_user(nfc_id):
